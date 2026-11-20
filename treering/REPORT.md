@@ -205,18 +205,30 @@ No. The working parts are published:
 
 - Freezing old columns and adding new ones that read them: Progressive Neural Networks
   (Rusu et al., 2016, [arXiv:1606.04671](https://arxiv.org/abs/1606.04671)).
-- Mixing frozen model snapshots with Bayesian weights and a regret bound: the Forget-Me-Not
-  Process (Milan et al., 2016,
-  [NeurIPS](https://proceedings.neurips.cc/paper/6055-the-forget-me-not-process.pdf)).
+- Mixing stored model states with exact Bayesian weights and a regret bound: the
+  Forget-Me-Not Process (Milan, Veness, Kirkpatrick, Bowling, Koop and Hassabis, NeurIPS 2016,
+  [paper](https://proceedings.neurips.cc/paper/6055-the-forget-me-not-process.pdf)).
 - Per-domain experts in a language model, mixed by a posterior over domains, with experts
   added without forgetting: DEMix (Gururangan et al., 2021,
   [arXiv:2108.05036](https://arxiv.org/abs/2108.05036)).
-- Experts each paired with a density model for task-free selection: TAME
-  ([arXiv:2210.03869](https://arxiv.org/pdf/2210.03869)); also Expert Gate (2017) and
-  CN-DPM (2020), cited from memory.
-- Switching between experts mid-sequence: fixed share (Herbster and Warmuth, 1998, cited
-  from memory; see also [arXiv:1008.4532](https://arxiv.org/abs/1008.4532)).
-- A language model rehearsing its own generated samples: LAMOL (2020), cited from memory.
+- A gate that picks the right frozen expert at test time without task labels: Expert Gate
+  (Aljundi, Chakravarty and Tuytelaars, 2016,
+  [arXiv:1611.06194](https://arxiv.org/abs/1611.06194)).
+- Experts added on demand, each with a density model used for task-free selection: CN-DPM
+  (Lee, Ha, Zhang and Kim, 2020, [arXiv:2001.00689](https://arxiv.org/abs/2001.00689)) and
+  TAME (Zhu, Majzoubi, Jain and Choromanska, 2022,
+  [arXiv:2210.03869](https://arxiv.org/abs/2210.03869)).
+- Switching between experts mid-sequence ("fixed share"): Herbster and Warmuth, "Tracking the
+  Best Expert", Machine Learning, 1998,
+  [doi:10.1023/A:1007424614876](https://doi.org/10.1023/A:1007424614876); see also Koolen and
+  van Erven, 2010, [arXiv:1008.4532](https://arxiv.org/abs/1008.4532).
+- A language model rehearsing its own generated samples: LAMOL (Sun, Ho and Lee, 2019,
+  [arXiv:1909.03329](https://arxiv.org/abs/1909.03329)).
+- The penalty-based baseline, EWC: Kirkpatrick et al., 2016,
+  [arXiv:1612.00796](https://arxiv.org/abs/1612.00796).
+
+Every reference above was checked on 2026-11-20 against the arXiv, Crossref or OpenAlex
+record for its identifier: title, authors and year match.
 
 Seven targeted searches did not find this exact combination: nested selves all read out in
 one forward pass, a switching mixture with a stated bound, and exact rollback. That is weak
