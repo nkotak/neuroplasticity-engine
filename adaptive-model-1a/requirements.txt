@@ -1,0 +1,16 @@
+torch>=2.0
+numpy>=1.24
+scikit-learn>=1.2
+tokenizers>=0.15
+datasets>=2.14
+safetensors>=0.4
+tqdm>=4.65
+loguru>=0.7
+pytest>=7.0
+pytest-cov>=4.0
+mlx>=0.29
+ebooklib>=0.18
+beautifulsoup4>=4.12
+pymupdf>=1.24
+matplotlib>=3.8
+typer>=0.9

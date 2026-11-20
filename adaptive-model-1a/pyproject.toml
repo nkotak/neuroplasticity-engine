@@ -1,0 +1,32 @@
+[project]
+name = "neuroplasticity-engine"
+version = "0.1.0"
+description = "Adaptive transformer with structural neuroplasticity"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0",
+    "numpy>=1.24",
+    "scikit-learn>=1.2",
+    "tokenizers>=0.15",
+    "datasets>=2.14",
+    "safetensors>=0.4",
+    "tqdm>=4.65",
+    "loguru>=0.7",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
