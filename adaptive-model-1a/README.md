@@ -1,69 +1,78 @@
-# Adaptive Model 1A - Instruct Edition
+# Adaptive Model 1A: the original prototype
 
-This project implements an adaptive transformer-based language model with instruction following capabilities and reasoning through thinking tags.
+**Status: superseded and kept for the record.** This was the first stage of the project. It
+did not test the project's hypothesis, and the model it trained never produced usable text.
+The experiment that did test the hypothesis is in [`../treering/`](../treering/); the overall
+story is in the [top-level README](../README.md).
 
-## Key Features
+## What it is
 
-- **Instruction Following:** The model is trained to follow instructions in a chat-style format
-- **Custom System Prompt:** Ability to provide custom system prompts to guide model behavior
-- **Reasoning with Thinking Tags:** The model uses `<think>...</think>` tags for explicit chain-of-thought reasoning
-- **SafeTensors Format:** The model is saved in the efficient and secure SafeTensors format
-- **Adaptive Architecture:** The model uses dynamic architecture with structural plasticity
+A language model built on MLX (Apple Silicon) whose feed-forward layers change shape while it
+trains:
 
-## Model Architecture
+- connections are pruned and regrown towards a fixed 40% sparsity;
+- neurons are split, merged, and added on a timer;
+- a controller pauses these changes when validation loss gets worse.
 
-- Vocabulary Size: 50,000 tokens
-- Hidden Dimension: 256
-- Attention Heads: 4
-- Transformer Layers: 4
-- Feedforward Dimension: 1024
-- Maximum Sequence Length: 64
-- Parameters: ~30M
+The model has 8 layers, 256 dimensions, a 32,000-token vocabulary and about 23 million
+parameters. Two outer loops were built around it and are described in `program.md`: one in
+which an agent edits the training code and keeps changes that pass a benchmark, and one in
+which a larger teacher model writes practice tasks that are verified before being used for
+fine-tuning.
 
-## Using the Model
+## What happened
 
-### Training
+- The last training run was stopped at step 33,482 of 60,000. Its best validation loss was
+  5.81 (perplexity 333), and training loss had been flat since about step 12,000.
+- The model scored 0 of 12 on its own benchmark. Its output was repeated fragments.
+- In that run the structure barely changed: 2 splits, 1 merge and 16 added neurons, taking
+  the widest layer from 1,024 to 1,031 neurons.
+- The only logged self-learning cycle was rejected by its own promotion gate.
 
-To train the model, run the `main.py` script:
+## Why it did not test the hypothesis
+
+The hypothesis is about learning new things over time without forgetting old ones. This
+prototype trained once on a fixed blend of data, so nothing new ever arrived. Growth ran on a
+timer and sparsity was pinned, so size could not follow what was learned. Nothing measured
+whether earlier knowledge survived.
+
+## Known problems
+
+- The embedding and output matrices are meant to be tied (`mlx_model.py`, `_tie_weights`) but
+  drift apart in training; saved checkpoints show them as different.
+- The trainer has no option to switch the structural changes off, so there is no baseline.
+- "Head pruning" masks slices of the combined attention output, not individual heads.
+- The PyTorch half cannot run: `main.py`, `adaptive_network.py`, `inference.py`,
+  `transformer_model/` and six of the nine test files import `torch`, which is not installed
+  in either environment. `pytest` is not installed either.
+- The data settings in `config.py` point at a folder on the original machine.
+
+## Layout
+
+| Path | Contents |
+|---|---|
+| `mlx_model.py`, `mlx_adaptive_feedforward.py`, `mlx_plasticity.py` | The model and the controller that prunes, regrows, splits and merges |
+| `mlx_train.py`, `mlx_data.py`, `mlx_inference.py`, `config.py` | Training, data, generation and settings |
+| `autoresearch/`, `selflearn/`, `programs/`, `program.md` | The two outer loops and their rules |
+| `spikes/exact_plasticity/` | Stage 2 of the project: exact bookkeeping with silent neurons |
+| `reports/`, `research_notes/` | Literature review on continual learning and growing networks |
+| `docs/superpowers/specs/` | An experiment design written before the final approach replaced it |
+| `main.py`, `adaptive_network.py`, `inference.py`, `transformer_model/` | Earlier PyTorch version; does not run |
+
+Not in the repository: trained weights, run logs, the tokenizer files, and the 29 MB training
+file `data/reasoning_50k/reasoning_data.jsonl` (regenerate it with
+`generate_reasoning_data.py`).
+
+## Running it
+
+The trainer has a 50-step smoke-test mode:
 
 ```bash
-python main.py
+./venv/bin/python mlx_train.py --quick
 ```
 
-This will:
-1. Train a tokenizer
-2. Load and process the training data
-3. Train the model with the custom system prompt embedded
-4. Save the model in both PyTorch and SafeTensors formats
+It was not re-run for this write-up, and it needs the data sources named in `config.py`,
+which are not all in this repository.
 
-### Inference
-
-To run inference with the model, use the `inference.py` script:
-
-```bash
-# Generate text in instruct mode
-python inference.py --prompt "Write a short poem about AI" --max_length 50
-
-# Start interactive chat mode
-python inference.py --chat
-
-# Use a custom system prompt
-python inference.py --chat --system_prompt "You are a helpful AI assistant that answers questions accurately."
-```
-
-### Chat Mode Commands
-
-When in chat mode, the following special commands are available:
-
-- `exit`, `quit`, `bye`: End the conversation
-- `debug`: Toggle debug mode for detailed information
-- `clear`: Clear conversation history
-- `system <prompt>`: Set a custom system prompt
-
-## Thinking Tags for Reasoning
-
-This model implements reasoning capabilities using thinking tags similar to those used in DeepSeek models. When the model is reasoning through a problem, it will use `<think>...</think>` tags to show its chain of thought.
-
-Example:
-
-```
+This code predates the memory caps in `../treering/safety.py`. Run one job at a time and
+watch memory if you start a full training run.
